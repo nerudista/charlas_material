@@ -21,6 +21,7 @@ server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 #app.config.suppress_callback_exceptions = True
 
+print("Starting again")
 
 df = pd.read_csv("./historia.csv",
 parse_dates=['Fecha'])
@@ -31,7 +32,7 @@ parse_dates=['Fecha'])
 df['DiaNombre']= pd.to_datetime(df['Fecha']).dt.day_name()
 df['Año'] = df['Fecha'].dt.year
 df['DiaNumero'] = df['Fecha'].dt.dayofweek
-df['Semana'] = df['Fecha'].dt.week
+df['Semana'] = df['Fecha'].dt.isocalendar().week
 
 
 #print(df)
@@ -47,6 +48,7 @@ fig_heat = px.density_heatmap(
     facet_col="Año",
     hover_name="Fecha",
     hover_data=["Hito", "Tipo"],
+    
     #labels=dict(x="Day of Week", y="Semana", color="Tipo"),
 )
 
@@ -59,29 +61,45 @@ fig_vega = alt.Chart(df).mark_rect().encode(
 
 
 def altair_fig():
-    return ( alt.Chart(df, height=400, width=120).mark_rect()
-        .encode(alt.X("DiaNombre:N",
-        sort=['Monday', 'Tuesday', 'Wednesday',
+    return ( alt.Chart(df).mark_rect()
+        .encode(
+            alt.X("DiaNombre:N",
+            sort=['Monday', 'Tuesday', 'Wednesday',
                 'Thursday', 'Friday', 'Saturday','Sunday']),
             alt.Y("Semana:O"),
             color="TipoCodigo:N",
             order=alt.Order("Semana", sort="descending"),
-             tooltip=list(df.columns))
-            .facet( column='Año:N')
-        .interactive().properties(title="Mi carrera").to_dict() )
-#fig_heat.update_traces(hovertemplate=None)
+            tooltip=["Fecha","Hito"],
+            facet=alt.Facet('Año:N', columns=8)
+        )
+        .properties(title="Mi carrera"
+        ).interactive().to_dict() )
 ###
 
 
 spec=altair_fig()
 
+
+### plotly figure
+
+go_heat = go.Figure(data=go.Heatmap(
+                   z=df['TipoCodigo'],
+                    x=df['DiaNombre'],
+                   y=df['Semana'],
+                   colorbar={'bordercolor':'#ffFF00'},
+                   xgap=0.3,
+                   hoverongaps = False),
+                   )
+
+### layout
 app.layout = html.Div(
     children=[
-        html.H1(children="Hello Dash 2020"),
-        html.Div(children="""Dash: A web application framework for Python."""),
-        
+        html.Div(children=""""""),
+        html.H1(children="""Reinventa tu carrera con Python"""),
+        html.H2(children="Python Panama"),        
+        dcc.Graph(figure= go_heat),
         dcc.Graph(figure= fig_heat),
-        dav.VegaLite(id="vega",spec=spec)
+        html.Div([dav.VegaLite(id="vega",spec=spec)])
     ]
 )
 
