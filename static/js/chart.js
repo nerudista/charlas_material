@@ -56,12 +56,13 @@
                 "legendX" : 300,
                 "legendY" : -60
             },
-            "scale": {"range": ["#E9C5B6", "#3B4756", "#d6dcd9","#8B161A"],
-            "opacity": 0.8,
+            "scale": {"range": ["#E9C5B6", "#3F7D20", "#8B161A","#d6dcd9"],
+            "opacity": 0.8, 
             }
         },
         "tooltip": [{"field": "Hito", "type": "nominal"},
-                     {"field":"Fecha", "timeUnit": "yearmonthdate", "title":"Fecha"}
+                     {"field":"Fecha", "timeUnit": "yearmonthdate", "title":"Fecha"},
+                     {"field":"Premisa"}
                     ],
         "href": {"field": "URL", "type": "nominal"}
     }
